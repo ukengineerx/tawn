@@ -1,0 +1,613 @@
+<title>Strikee, Explained</title>
+<meta name="explainer:source" content="docs/competitors/strikee/README.md sha256:ccca704f5bb8">
+<meta name="explainer:source" content="docs/competitors/strikee/app-walkthrough.md sha256:a88e0ad7a2dc">
+<meta name="explainer:artifact" content="https://claude.ai/artifact/KQbzuCEGsu49yhCThrXHUp">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~68ch) that follows a venue's night in order; figures and diagrams break slightly wider. Baize green = Strikee facts, chalk blue = notes for Tawn. */
+:root {
+  --bg: #f4f6f3;
+  --surface: #ffffff;
+  --sunk: #e9eee9;
+  --fg: #16201a;
+  --muted: #56635b;
+  --line: #d7dfd9;
+  --baize: #1d6a44;
+  --baize-soft: #e2f0e7;
+  --chalk: #2a64a3;
+  --chalk-soft: #e4eef9;
+  --good: #1e7a46;
+  --warn: #a8701a;
+  --warn-soft: #fbf0db;
+  --bad: #b23a2e;
+  --bad-soft: #f8e3e0;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1411; --surface: #151e19; --sunk: #1b2620; --fg: #e5ebe7; --muted: #9aa69f; --line: #2a3630;
+    --baize: #5cc48d; --baize-soft: #183526; --chalk: #85b6ea; --chalk-soft: #172a40;
+    --good: #5cc48d; --warn: #e2b05a; --warn-soft: #362a14; --bad: #ec7e72; --bad-soft: #3a1d1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1411; --surface: #151e19; --sunk: #1b2620; --fg: #e5ebe7; --muted: #9aa69f; --line: #2a3630;
+  --baize: #5cc48d; --baize-soft: #183526; --chalk: #85b6ea; --chalk-soft: #172a40;
+  --good: #5cc48d; --warn: #e2b05a; --warn-soft: #362a14; --bad: #ec7e72; --bad-soft: #3a1d1a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.page { max-width: 760px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+a { color: var(--chalk); }
+.label { font: 500 0.72rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.lede { font-size: 1.08rem; color: var(--muted); max-width: 62ch; }
+
+/* Hero */
+.hero { padding-top: 56px; display: grid; gap: 18px; }
+.hero .label { color: var(--baize); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.facts div { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; }
+.facts strong { font-weight: 600; }
+
+/* Verdict */
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.verdict > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.verdict h3 { font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.verdict ul { font-size: 0.95rem; }
+
+/* Night flow */
+.flow { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: step; }
+.flow li { position: relative; padding: 0 6px; display: grid; gap: 6px; justify-items: center; text-align: center; font-size: 0.86rem; line-height: 1.35; }
+.flow li::before { counter-increment: step; content: counter(step); width: 34px; height: 34px; border-radius: 50%; background: var(--baize); color: var(--surface); display: grid; place-items: center; font: 600 0.9rem var(--font-mono); position: relative; z-index: 1; }
+.flow li::after { content: ""; position: absolute; top: 17px; left: 50%; width: 100%; height: 2px; background: var(--line); }
+.flow li:last-child::after { display: none; }
+.flow b { font-weight: 600; }
+.flow a { text-decoration: none; color: inherit; }
+.flow a:hover b, .flow a:focus-visible b { color: var(--baize); text-decoration: underline; }
+@media (max-width: 620px) {
+  .flow { grid-template-columns: 1fr; gap: 14px; }
+  .flow li { grid-template-columns: 34px 1fr; justify-items: start; text-align: left; align-items: center; column-gap: 12px; }
+  .flow li::after { top: 34px; left: 16px; width: 2px; height: 100%; }
+  .flow li span { grid-column: 2; }
+}
+
+/* Stage sections */
+.stage-no { font: 600 0.8rem var(--font-mono); color: var(--baize); }
+.points { display: grid; gap: 10px; }
+.points li::marker { color: var(--baize); }
+.tag { display: inline-block; font: 500 0.68rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 4px; vertical-align: 2px; margin-left: 4px; white-space: nowrap; }
+.tag.seen { background: var(--baize-soft); color: var(--baize); }
+.tag.claim { background: var(--warn-soft); color: var(--warn); }
+.tag.missing { background: var(--bad-soft); color: var(--bad); }
+.tawn { background: var(--chalk-soft); border-left: 3px solid var(--chalk); border-radius: 0 8px 8px 0; padding: 12px 16px; display: grid; gap: 4px; }
+.tawn .label { color: var(--chalk); }
+
+/* Figures */
+figure { margin: 0; display: grid; gap: 8px; }
+.shot { display: block; width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--sunk); cursor: zoom-in; }
+.shot:focus-visible { outline: 2px solid var(--chalk); outline-offset: 2px; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot.tall img { aspect-ratio: 1265 / 900; object-fit: cover; object-position: top; }
+figcaption { font-size: 0.85rem; color: var(--muted); }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+/* Wizard stepper */
+.stepper { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.stepper li { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: 0.88rem; display: grid; gap: 0; }
+.stepper li small { color: var(--muted); font-size: 0.78rem; }
+
+/* Bill modes */
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.mode { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.mode svg { width: 100%; height: 44px; }
+.mode p { font-size: 0.92rem; }
+
+/* Business day timeline */
+.daybar { display: grid; gap: 8px; }
+.daytrack { position: relative; height: 40px; border-radius: 8px; background: linear-gradient(90deg, var(--sunk) 0 0); border: 1px solid var(--line); overflow: hidden; }
+.dayfill { position: absolute; inset: 0 auto 0 0; width: 100%; background: var(--baize-soft); }
+.daymark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--baize); }
+.daymark.mid { background: var(--muted); opacity: 0.6; }
+.daypin { position: absolute; top: 8px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: var(--chalk); border: 3px solid var(--surface); }
+.dayticks { position: relative; height: 18px; font: 0.75rem var(--font-mono); color: var(--muted); }
+.dayticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.dayticks span:first-child { transform: none; }
+.dayticks span:last-child { transform: translateX(-100%); }
+
+/* Money-on-account table */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font: 500 0.72rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--sunk); }
+td:first-child { font-weight: 600; white-space: nowrap; }
+
+/* Credit bands */
+.bands { display: grid; grid-template-columns: 50fr 30fr 20fr; border-radius: 8px; overflow: hidden; font-size: 0.82rem; }
+.bands div { padding: 8px 10px; display: grid; gap: 2px; }
+.bands div:nth-child(1) { background: var(--baize-soft); color: var(--good); }
+.bands div:nth-child(2) { background: var(--warn-soft); color: var(--warn); }
+.bands div:nth-child(3) { background: var(--bad-soft); color: var(--bad); }
+.bands b { font-weight: 600; }
+
+/* Booking states */
+.states { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.state { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; }
+.state.manual { border-style: dashed; border-color: var(--warn); }
+.arrow { color: var(--muted); font-family: var(--font-mono); }
+
+/* Roles */
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.roles > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; font-size: 0.92rem; }
+
+/* Rough edges */
+.edges { list-style: none; padding: 0; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.edges li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.edges li:last-child { border-bottom: 0; }
+
+/* Borrow list */
+.borrow { counter-reset: b; list-style: none; padding: 0; display: grid; gap: 12px; }
+.borrow li { counter-increment: b; display: grid; grid-template-columns: 2.2em 1fr; gap: 4px 10px; }
+.borrow li::before { content: counter(b); font: 600 0.95rem var(--font-mono); color: var(--chalk); grid-row: span 2; padding-top: 1px; }
+.borrow b { font-weight: 600; }
+.borrow span { color: var(--muted); font-size: 0.93rem; grid-column: 2; }
+
+footer.src { border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+footer.src code { font-family: var(--font-mono); font-size: 0.82rem; }
+
+/* Lightbox */
+dialog.lb { border: 0; padding: 0; background: transparent; max-width: min(96vw, 1400px); max-height: 94vh; }
+dialog.lb::backdrop { background: rgba(8, 12, 10, 0.82); }
+dialog.lb img { display: block; max-width: 100%; max-height: 90vh; border-radius: 8px; }
+dialog.lb button { position: absolute; top: 8px; right: 8px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: 500 0.85rem var(--font-body); cursor: pointer; }
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <p class="label">Competitor · Read in about 10 minutes</p>
+  <h1>Strikee, explained</h1>
+  <p class="lede">Strikee is counter software for Indian snooker halls, sports courts, turfs and PS5 gaming cafés. Staff start a timer per table, bill by the frame or the hour, and every rupee lands in a daily cashbook. This page walks through a venue's night the way Strikee handles it, and notes what Tawn could do differently.</p>
+  <div class="facts">
+    <div><span class="label">Price</span><strong class="num">₹449–599/mo</strong><span class="muted">GST included</span></div>
+    <div><span class="label">Platform</span><strong>Web app (PWA)</strong><span class="muted">No native app</span></div>
+    <div><span class="label">Stage</span><strong>Public beta v0.7</strong><span class="muted">Founded 2024</span></div>
+    <div><span class="label">Home base</span><strong>Snooker &amp; pool</strong><span class="muted">Tier 2–4 cities</span></div>
+  </div>
+</header>
+
+<section aria-labelledby="verdict">
+  <header>
+    <h2 id="verdict">The short version</h2>
+  </header>
+  <div class="verdict">
+    <div>
+      <h3><span class="dot" style="background:var(--good)"></span>What it does well</h3>
+      <ul>
+        <li>Knows the domain: frames, slots, khata, "losers pay".</li>
+        <li>A settle screen that won't take payment until the amounts add up.</li>
+        <li>Ledger rows that name the staff member who made them and can only be changed where they came from.</li>
+      </ul>
+    </div>
+    <div>
+      <h3><span class="dot" style="background:var(--bad)"></span>Where it falls short</h3>
+      <ul>
+        <li>No till count or day close, and the cash totals disagree with the list below them.</li>
+        <li>No way to refund a payment once it's settled.</li>
+        <li>Nothing loads offline, and bookings can't be paid online.</li>
+      </ul>
+    </div>
+    <div>
+      <h3><span class="dot" style="background:var(--chalk)"></span>Openings for Tawn</h3>
+      <ul>
+        <li>A real day close that matches the counted till.</li>
+        <li>Proper refunds and corrections, and online booking with payment.</li>
+        <li>A native counter app that keeps working without a connection.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="night">
+  <header>
+    <h2 id="night">A night at the counter</h2>
+    <p class="lede">Everything in Strikee hangs off this loop. Tap a step to jump to it.</p>
+  </header>
+  <ol class="flow">
+    <li><a href="#s-start"><span><b>Customer walks in</b><br>or books ahead</span></a></li>
+    <li><a href="#s-start"><span><b>Start a session</b><br>6-step wizard</span></a></li>
+    <li><a href="#s-start"><span><b>Play</b><br>timer or frame count</span></a></li>
+    <li><a href="#s-settle"><span><b>Settle the tab</b><br>split across modes</span></a></li>
+    <li><a href="#s-settle"><span><b>Receipt</b><br>invoice with GSTIN</span></a></li>
+    <li><a href="#s-cash"><span><b>Cashbook</b><br>business day ends 5 AM</span></a></li>
+  </ol>
+</section>
+
+<section id="s-start" aria-labelledby="h-start">
+  <header>
+    <span class="stage-no">Steps 1–3</span>
+    <h2 id="h-start">Starting a session</h2>
+  </header>
+  <p>Staff press <b>Book/Record</b> and go through six short steps. Most of the product's pricing rules show up here.</p>
+  <ol class="stepper">
+    <li>Mode<small>who pays</small></li>
+    <li>Facility<small>table, court, console</small></li>
+    <li>Kind<small>walk-in or booking</small></li>
+    <li>Variation<small>price package</small></li>
+    <li>Customer<small>search or add</small></li>
+    <li>Payment<small>optional deposit</small></li>
+  </ol>
+
+  <h3>Three ways to split the bill</h3>
+  <div class="modes">
+    <div class="mode">
+      <svg viewBox="0 0 180 44" aria-hidden="true"><circle cx="30" cy="22" r="14" fill="var(--baize)"/><text x="30" y="27" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" fill="var(--surface)">₹</text><line x1="52" y1="22" x2="150" y2="22" stroke="var(--line)" stroke-width="2"/><circle cx="160" cy="22" r="10" fill="none" stroke="var(--baize)" stroke-width="2"/></svg>
+      <h3>Regular</h3>
+      <p>One customer pays everything. They can keep several sessions open until they leave.</p>
+    </div>
+    <div class="mode">
+      <svg viewBox="0 0 180 44" aria-hidden="true"><circle cx="30" cy="22" r="12" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="70" cy="22" r="12" fill="var(--bad)"/><circle cx="110" cy="22" r="12" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="150" cy="22" r="12" fill="var(--bad)"/></svg>
+      <h3>Losers pay</h3>
+      <p>Pick the players. At the end staff mark who lost, and the cost becomes their debt.</p>
+    </div>
+    <div class="mode">
+      <svg viewBox="0 0 180 44" aria-hidden="true"><circle cx="30" cy="22" r="12" fill="var(--baize)" opacity="0.7"/><circle cx="70" cy="22" r="12" fill="var(--baize)" opacity="0.7"/><circle cx="110" cy="22" r="12" fill="var(--baize)" opacity="0.7"/><circle cx="150" cy="22" r="12" fill="var(--baize)" opacity="0.7"/></svg>
+      <h3>Split pay</h3>
+      <p>The cost splits equally. Each player gets their own debt for their share.</p>
+    </div>
+  </div>
+
+  <ul class="points">
+    <li><b>Prices are saved packages per table</b>, such as "Per Frame ₹120" or "Per Hour ₹250". Each one also says whether money is taken upfront or at the end. Staff can override either for one session. <span class="tag seen">Seen in app</span></li>
+    <li><b>Picking a sport sets the pricing model.</b> Snooker bills per frame, badminton per 60-minute slot, football turf per 90 minutes. <span class="tag seen">Seen in app</span></li>
+    <li><b>Frames are counted by hand.</b> The session starts at 1 frame, and staff bump the count from the session card as play goes on. <span class="tag seen">Seen in app</span></li>
+  </ul>
+
+  <figure>
+    <button class="shot" type="button" data-full="screenshots/session-wizard-payment-step.jpg" aria-label="Enlarge: session wizard payment step">
+      <img src="screenshots/session-wizard-payment-step.jpg" alt="The last wizard step, Collect now (optional), with a store-credit banner and Cash, UPI, Card and Online buttons" loading="lazy">
+    </button>
+    <figcaption>The last step. Collecting money now is optional, and the customer's store credit is offered automatically.</figcaption>
+  </figure>
+
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Bill modes and saved price packages are worth copying almost as they are. Hand-counted frames are a weak spot: a one-tap "next frame" on the table card, or a timer-based estimate, would cut counter errors.</p>
+  </div>
+</section>
+
+<section id="s-settle" aria-labelledby="h-settle">
+  <header>
+    <span class="stage-no">Steps 4–5</span>
+    <h2 id="h-settle">Settling the tab</h2>
+  </header>
+  <ul class="points">
+    <li><b>One payment can use several methods.</b> Cash ₹70 plus UPI ₹50 for a ₹120 frame is normal, and the receipt shows both. <span class="tag seen">Seen in app</span></li>
+    <li><b>Store credit is applied first, automatically.</b> In the demo a ₹400 refund had become store credit, and ₹120 of it paid the next frame. <span class="tag seen">Seen in app</span></li>
+    <li><b>Coupons are entered here</b> and can be undone before payment. A deposit already paid is never touched. <span class="tag seen">Seen in app</span></li>
+    <li><b>"Credit" is a payment method.</b> Choosing it puts the amount on the customer's khata. <span class="tag seen">Seen in app</span></li>
+    <li><b>The payment button stays disabled until the amounts balance.</b> The screen says "Payment balanced" or "Over by ₹70". <span class="tag seen">Seen in app</span></li>
+    <li><b>Each method becomes its own cashbook row</b>, all under one invoice number. <span class="tag seen">Seen in app</span></li>
+    <li><b>The Sessions list doesn't refresh afterwards.</b> The tab still looks open until the page is reloaded. <span class="tag missing">Bug in app</span></li>
+  </ul>
+  <div class="pair">
+    <figure>
+      <button class="shot" type="button" data-full="screenshots/settle-split-payment.jpg" aria-label="Enlarge: split payment">
+        <img src="screenshots/settle-split-payment.jpg" alt="Payment dialog with Method 1 Cash ₹70 and Method 2 UPI ₹50" loading="lazy">
+      </button>
+      <figcaption>Two methods on one ₹120 bill.</figcaption>
+    </figure>
+    <figure>
+      <button class="shot" type="button" data-full="screenshots/session-receipt.jpg" aria-label="Enlarge: receipt">
+        <img src="screenshots/session-receipt.jpg" alt="Invoice DEMO-MS-40046 for ₹120, paid Cash ₹70 and UPI ₹50" loading="lazy">
+      </button>
+      <figcaption>The receipt is a proper invoice, with Print and Save PDF.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="s-cash" aria-labelledby="h-cash">
+  <header>
+    <span class="stage-no">Step 6</span>
+    <h2 id="h-cash">The cashbook and the business day</h2>
+  </header>
+  <p>The cashbook shows one business day at a time. That day runs from <b>5 AM to 5 AM</b>, so a frame played at 1:30 AM still counts toward the evening it started in.</p>
+  <div class="daybar" role="img" aria-label="Business day 17 November runs from 5 AM on the 17th to 5 AM on the 18th. A payment at 1:30 AM on the 18th belongs to the 17th.">
+    <div class="daytrack">
+      <div class="dayfill"></div>
+      <div class="daymark mid" style="left:79.17%"></div>
+      <div class="daypin" style="left:85.4%"></div>
+    </div>
+    <div class="dayticks">
+      <span style="left:0">5 AM, 17 Nov</span>
+      <span style="left:54.17%">6 PM</span>
+      <span style="left:79.17%">midnight</span>
+      <span style="left:100%">5 AM, 18 Nov</span>
+    </div>
+    <p class="muted" style="font-size:0.88rem">The blue dot is a payment at 1:30 AM on the 18th. It is counted in the 17 Nov business day.</p>
+  </div>
+  <ul class="points">
+    <li><b>Six totals at the top:</b> today's balance, cash in hand, expenses, UPI/card, credit used and credit settled. <span class="tag seen">Seen in app</span></li>
+    <li><b>Expenses have a "paid from sales till" switch.</b> It separates money that left the till from money the owner paid personally. <span class="tag seen">Seen in app</span></li>
+    <li><b>Rows that came from a session are read-only here.</b> To change one, staff edit the session, so the books can't drift away from the floor. Manual rows can be edited or deleted. <span class="tag seen">Seen in app</span></li>
+    <li><b>No till count or day close, on today or any past day.</b> The website's headline promise is a cashbook that matches the till at closing. The app only shows running totals. <span class="tag missing">Missing in app</span></li>
+    <li><b>The totals contradict the list.</b> With ₹2,300 of cash and ₹650 of UPI income listed, "Cash in hand" and "UPI / Card" both read ₹0, and stayed at ₹0 after a new payment. <span class="tag missing">Bug in app</span></li>
+    <li><b>Recurring expenses</b> such as rent and salaries are marked "coming soon". <span class="tag claim">Roadmap</span></li>
+  </ul>
+  <figure>
+    <button class="shot" type="button" data-full="screenshots/cashbook-after-settle.jpg" aria-label="Enlarge: cashbook after a payment">
+      <img src="screenshots/cashbook-after-settle.jpg" alt="Cashbook for 17 Nov 2026 showing Cash in hand ₹0 and UPI / Card ₹0 just after a ₹70 cash and ₹50 UPI payment" loading="lazy">
+    </button>
+    <figcaption>Taken just after a ₹70 cash and ₹50 UPI payment. Cash in hand and UPI still read ₹0.</figcaption>
+  </figure>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>This is the clearest gap. A close-the-day step (count the cash, compare with what was booked, record the difference, lock the day) is what owners are told they're buying, and Strikee doesn't have it. The totals have to be right before a day close means anything. Copy the 5 AM cutoff, the till switch and the read-only session rows.</p>
+  </div>
+</section>
+
+<section id="s-fix" aria-labelledby="h-fix">
+  <header>
+    <h2 id="h-fix">Fixing mistakes and giving money back</h2>
+    <p class="lede">The second review pass tried what a counter does when something goes wrong. This is where Strikee is weakest.</p>
+  </header>
+  <ul class="points">
+    <li><b>An open session can be moved to another customer, edited or deleted.</b> Editing changes frames, price and times. <span class="tag seen">Seen in app</span></li>
+    <li><b>Delete is owner-only and logged with the owner's name.</b> But it called a session holding a ₹10 deposit "a clean delete", and its advice to "use Cancel instead" points to an action that doesn't exist. <span class="tag missing">Bug in app</span></li>
+    <li><b>No refund for a settled payment.</b> Receipts, paid tabs, cashbook rows and the member profile have no refund action. Refunds exist in the sample data (₹400 returned as store credit), so it may sit behind a role or state the demo can't reach. <span class="tag missing">Missing in app</span></li>
+    <li><b>An overpaid tab can't be closed.</b> When a session price was lowered below the deposit, closing the tab failed with a mismatch error. The only way out was to put the price back up. <span class="tag missing">Bug in app</span></li>
+    <li><b>The till passcode wasn't set in the demo,</b> so deletes and edits went through without a prompt. <span class="tag seen">Seen in app</span></li>
+  </ul>
+  <div class="pair">
+    <figure>
+      <button class="shot" type="button" data-full="screenshots/session-delete-dialog.jpg" aria-label="Enlarge: delete session dialog">
+        <img src="screenshots/session-delete-dialog.jpg" alt="Delete this session dialog saying no payment was taken, on a tab with a deposit" loading="lazy">
+      </button>
+      <figcaption>The delete dialog says no payment was taken, on a tab that has a deposit.</figcaption>
+    </figure>
+    <figure>
+      <button class="shot" type="button" data-full="screenshots/tab-close-overpaid.jpg" aria-label="Enlarge: overpaid tab error">
+        <img src="screenshots/tab-close-overpaid.jpg" alt="Error toast saying payment methods total does not match amount owed of minus 10, on a tab marked Paid in full" loading="lazy">
+      </button>
+      <figcaption>A tab owing ₹-10 shows "Paid in full" but can't be closed.</figcaption>
+    </figure>
+  </div>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Treat corrections as first-class. Refunds should be reversing entries to cash, UPI or store credit. Deleting should be for sessions with no money attached, with a separate void for the rest. When a tab is overpaid, offer the difference back as change or store credit. All of it goes behind the owner's passcode.</p>
+  </div>
+</section>
+
+<section id="s-customers" aria-labelledby="h-customers">
+  <header>
+    <h2 id="h-customers">Customers and money on account</h2>
+    <p class="lede">Strikee keeps four separate ideas of money held for or by a customer. They're easy to mix up, so here they are side by side.</p>
+  </header>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Concept</th><th>Who owes whom</th><th>How it starts</th><th>How it's used</th></tr></thead>
+      <tbody>
+        <tr><td>Khata (credit)</td><td>Customer owes the venue</td><td>"Credit" chosen as the payment method</td><td>Paid down later, up to a limit per customer</td></tr>
+        <tr><td>Store credit</td><td>Venue owes the customer</td><td>A refund paid out as credit</td><td>Applied automatically at the next payment</td></tr>
+        <tr><td>Membership</td><td>Prepaid hours or frames</td><td>Sold from the profile, e.g. 20 frames for ₹2,000</td><td>Drawn down at each visit, lapses at expiry</td></tr>
+        <tr><td>Coupon</td><td>A discount</td><td>Printed single-use code or shared code</td><td>₹ off, % off, free play or a free item</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The credit watchlist</h3>
+  <p>Customers who owe money are grouped by how much of their limit they've used. Each row has <b>Send reminder</b>, which opens WhatsApp with a ready message that staff still have to send, and <b>Collect</b>.</p>
+  <div class="bands" role="img" aria-label="Credit bands: Healthy below 50 percent, Approaching 50 to 80 percent, Over the edge 80 percent and up">
+    <div><b>Healthy</b><span class="num">below 50%</span></div>
+    <div><b>Approaching</b><span class="num">50–80%</span></div>
+    <div><b>Over the edge</b><span class="num">80%+</span></div>
+  </div>
+
+  <figure>
+    <button class="shot tall" type="button" data-full="screenshots/member-profile.jpg" aria-label="Enlarge: member profile">
+      <img src="screenshots/member-profile.jpg" alt="Member profile for Chandan showing credit usage, store credit of ₹400, what they owe, and three ledgers" loading="lazy">
+    </button>
+    <figcaption>A member profile, cropped (click for the full page). Below the fold are three ledgers, and each row names the staff member who made it. Note the "-80%" usage: store credit is being shown as negative credit.</figcaption>
+  </figure>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Keep the four concepts but show them as separate balances, never as one signed number. Automate the reminder so it actually goes out instead of waiting on staff.</p>
+  </div>
+</section>
+
+<section id="s-bookings" aria-labelledby="h-bookings">
+  <header>
+    <h2 id="h-bookings">Bookings</h2>
+  </header>
+  <p>Staff can book from a 30-minute <b>slot board</b> covering today and tomorrow. Players can also ask for a booking from the venue's public page, but that's a request, not a booking:</p>
+  <div class="states" role="img" aria-label="Booking request states: New, then Awaiting payment, then Confirmed, then Closed. Payment is collected by hand over WhatsApp.">
+    <span class="state">New</span><span class="arrow">→</span>
+    <span class="state manual">Awaiting payment</span><span class="arrow">→</span>
+    <span class="state">Confirmed</span><span class="arrow">→</span>
+    <span class="state">Closed</span>
+  </div>
+  <p class="muted" style="font-size:0.9rem">The dashed step is manual. Staff WhatsApp a UPI QR, wait for the advance, then confirm. Only then does the booking appear on the slot board.</p>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Instant booking with payment at the point of request removes the manual middle step completely. Strikee chose not to process payments, so this is a real difference rather than a small feature.</p>
+  </div>
+</section>
+
+<section id="s-owner" aria-labelledby="h-owner">
+  <header>
+    <h2 id="h-owner">The owner's side</h2>
+  </header>
+  <div class="roles">
+    <div><span class="label">Admin</span><p>Runs the floor: sessions, payments, members, credit limits and even pricing. Can't see revenue or export.</p></div>
+    <div><span class="label">Co-owner</span><p>Adds the dashboard, financials, exports and team management.</p></div>
+    <div><span class="label">Owner</span><p>The only one who can refund, delete sessions, transfer ownership or delete the venue.</p></div>
+  </div>
+  <ul class="points">
+    <li><b>Till lock:</b> an optional 4-digit passcode guards refunds, deletions, credit settlement and pricing, even for staff who are logged in. It locks after 15 minutes idle. <span class="tag seen">Seen in app</span></li>
+    <li><b>No floor-only role.</b> The lowest role can still change prices. <span class="tag seen">Seen in app</span></li>
+    <li><b>Reports for the accountant:</b> P&amp;L, member ledger, staff payout summary and a custom report, as PDF or CSV. <span class="tag seen">Seen in app</span></li>
+    <li><b>Dashboard:</b> overview, financial, customer and operations tabs, including peak hours, retention and plain-sentence insights and recommendations. It opens on the current month, which was empty in the demo. The data is under Yearly. <span class="tag seen">Seen in app</span></li>
+  </ul>
+  <figure>
+    <button class="shot tall" type="button" data-full="screenshots/dashboard-yearly-overview.jpg" aria-label="Enlarge: dashboard overview">
+      <img src="screenshots/dashboard-yearly-overview.jpg" alt="Owner dashboard overview tab for the year, with revenue, expenses, refunds and profit" loading="lazy">
+    </button>
+    <figcaption>The dashboard's yearly overview, cropped (click for the full page).</figcaption>
+  </figure>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Open the dashboard on a period that has data, such as the last 7 days. An empty first screen makes the product look broken.</p>
+  </div>
+</section>
+
+<section id="s-offline" aria-labelledby="h-offline">
+  <header>
+    <h2 id="h-offline">When the connection drops</h2>
+    <p class="lede">Strikee installs like an app, but it still needs the internet.</p>
+  </header>
+  <ul class="points">
+    <li><b>Pages don't load offline.</b> Clicking a menu item or reloading shows the browser's "No internet" page. <span class="tag seen">Tested in app</span></li>
+    <li><b>An open page keeps working,</b> with no banner to say the connection is gone. <span class="tag seen">Tested in app</span></li>
+    <li><b>Saves wait and retry.</b> An expense saved offline sat on "Saving…" and went through once the connection returned. If the tab had been closed or reloaded, the entry would have been lost, and staff get no warning. <span class="tag seen">Tested in app</span></li>
+    <li><b>Lists don't always keep up.</b> The Sessions list can hang on "Loading active sessions…", and the sidebar's live count can disagree with it. <span class="tag missing">Bug in app</span></li>
+  </ul>
+  <figure>
+    <button class="shot" type="button" data-full="screenshots/offline-expense-save.jpg" aria-label="Enlarge: expense saving while offline">
+      <img src="screenshots/offline-expense-save.jpg" alt="Log expense dialog stuck on Saving while the browser is offline" loading="lazy">
+    </button>
+    <figcaption>An expense saved while offline. The button says "Saving…" and nothing tells staff why.</figcaption>
+  </figure>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Counter staff in small towns lose signal often. Store sessions and payments on the device, show clearly what hasn't synced yet, and send it when the connection returns, even if the app was closed in between.</p>
+  </div>
+</section>
+
+<section id="s-growth" aria-labelledby="h-growth">
+  <header>
+    <h2 id="h-growth">Growth and pricing</h2>
+  </header>
+  <ul class="points">
+    <li><b>Public venue pages</b> at <span class="num">strikee.in/{venue}</span> list prices by player count with peak and off-peak columns, consoles, games, photos and an FAQ written for Google. They double as Strikee's marketing, with "Page by Strikee" at the bottom. <span class="tag seen">Seen live</span></li>
+    <li><b>Strikee runs three venues of its own</b> in Navsari (two PS5 lounges and a pool and snooker hall), listed on strikee.in like any customer. The flagship lounge's page didn't load. <span class="tag seen">Seen live</span></li>
+    <li><b>The tournament wizard does the arithmetic.</b> It turns field size and group settings into "4 groups of 4 · 24 group matches · 7 knockout matches", and an entry fee and house cut into the prize pot. <span class="tag seen">Seen in app</span></li>
+    <li><b>Tournament limits:</b> entries go through WhatsApp or Instagram, only Snooker, EA FC 26 and FC 27 are supported, and the prize split doesn't rescale when the pot changes. <span class="tag seen">Seen in app</span></li>
+    <li><b>Pricing scales with tables, not staff.</b> Pro (₹449/mo) covers up to 4 units. Ultra (₹599/mo) has no limit and adds tournaments, the public page and memberships. <span class="tag seen">Seen in app</span></li>
+    <li><b>The trial goes read-only instead of deleting.</b> After 30 days new sessions stop and staff are logged out, but the data stays readable. <span class="tag seen">Seen in app</span></li>
+    <li><b>The upgrade page uses the venue's own numbers,</b> for example "₹16.44 a day" and "₹4.76 per logged session". <span class="tag seen">Seen in app</span></li>
+  </ul>
+  <figure>
+    <button class="shot tall" type="button" data-full="screenshots/tournament-step4-entry-funded.jpg" aria-label="Enlarge: tournament pot step">
+      <img src="screenshots/tournament-step4-entry-funded.jpg" alt="Tournament wizard pot step: ₹500 entry, 10% house cut, 16 entries make ₹8,000 and the house keeps ₹800" loading="lazy">
+    </button>
+    <figcaption>The pot step: 16 entries at ₹500 with a 10% house cut. Only ₹2,500 of the ₹7,200 pool goes out as prizes, because the default split didn't rescale.</figcaption>
+  </figure>
+</section>
+
+<section id="s-edges" aria-labelledby="h-edges">
+  <header>
+    <h2 id="h-edges">What didn't add up</h2>
+    <p class="lede">Some of these may come from the demo's sample data rather than the product.</p>
+  </header>
+  <p>The money problems (cashbook totals, refunds, overpaid tabs, the delete dialog) are covered above. The rest:</p>
+  <ul class="edges">
+    <li><b>A member's history was empty.</b><span class="muted">"No game sessions or payments yet" for a customer who had paid twice that day.</span></li>
+    <li><b>A busy table shows as free.</b><span class="muted">The session wizard offered a table as "Free now" while an overstayed session was still open on it.</span></li>
+    <li><b>Store credit shows as negative credit usage.</b><span class="muted">A member holding ₹400 of store credit is shown as "-80%" of their credit limit.</span></li>
+    <li><b>Wrong labels.</b><span class="muted">The edit dialog calls a snooker table's price "Console", and the venue switcher says "No tables yet" for a venue with 13.</span></li>
+    <li><b>Plan prices don't match.</b><span class="muted">Settings shows "Professional ₹399/month". The public price list says Pro is ₹449.</span></li>
+    <li><b>Prize numbers don't match.</b><span class="muted">One public tournament page lists a ₹2,500 prize pool and a ₹15,000 winner's prize.</span></li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-borrow">
+  <header>
+    <h2 id="h-borrow">Ideas to borrow</h2>
+    <p class="lede">Useful whatever Tawn turns out to be.</p>
+  </header>
+  <ol class="borrow">
+    <li><b>5 AM business-day cutoff</b><span>Late-night play counts toward the right evening.</span></li>
+    <li><b>Saved price packages per table</b><span>Each has a unit, a duration and an upfront-or-later rule, and can be overridden per session.</span></li>
+    <li><b>Group bill modes</b><span>Regular, Losers pay and Split pay, each creating a debt per player.</span></li>
+    <li><b>"Paid from sales till" switch on expenses</b><span>Keeps till cash apart from the owner's own money.</span></li>
+    <li><b>Refunds as store credit</b><span>Offered automatically at the next payment.</span></li>
+    <li><b>Passcode on risky actions</b><span>Lighter than a full role system.</span></li>
+    <li><b>Credit watchlist in bands</b><span>Grouped by share of the limit used, with a one-tap message.</span></li>
+    <li><b>Two kinds of coupon</b><span>Printed single-use codes that fail when photocopied, and shared codes with limits per phone number.</span></li>
+    <li><b>A trial that ends read-only</b><span>Plus an upgrade page priced in the venue's own numbers.</span></li>
+    <li><b>Public venue and tournament pages</b><span>They work as search pages, a booking inbox and free acquisition, with no payment gateway needed.</span></li>
+    <li><b>A settle screen that can't go wrong</b><span>Store credit applied by default, pick which sessions to settle, split across methods, and no submitting until it balances.</span></li>
+    <li><b>Ledger rows owned by their source</b><span>Cashbook rows from a session change only through the session, so the books match the floor.</span></li>
+    <li><b>A tournament wizard that does the arithmetic</b><span>Groups, match counts and the prize pot are worked out as you go.</span></li>
+    <li><b>Prices by player count, peak and off-peak</b><span>For consoles shared by up to four players.</span></li>
+  </ol>
+</section>
+
+<section aria-labelledby="h-open">
+  <header>
+    <h2 id="h-open">Still unknown</h2>
+  </header>
+  <ul class="points">
+    <li>Where do real venues refund a settled payment, if the demo has no button for it?</li>
+    <li>Do the cashbook totals disagree with the list in real accounts too, or only in the demo's generated data?</li>
+    <li>How many venues actually pay, given the beta label, founder-led support and the three venues Strikee runs itself?</li>
+  </ul>
+  <p class="muted" style="font-size:0.9rem">Settled by the second pass: there is no day close anywhere, the dashboard has full data under Yearly, and the app doesn't work offline beyond a page already open.</p>
+</section>
+
+<footer class="src">
+  <p><b>Generated for reading, not for editing.</b> The source of truth is <code>docs/competitors/strikee/README.md</code> and <code>app-walkthrough.md</code>. Change those, then regenerate this page.</p>
+  <p>Built 17 Nov 2026 from strikee.in and two passes through the public live demo: one that opened every screen, and one that settled, edited, deleted and went offline with small test amounts (all checked 17 Nov 2026). Screenshots from <code>docs/competitors/strikee/screenshots/</code>.</p>
+</footer>
+
+</div>
+
+<dialog class="lb" id="lb" aria-label="Screenshot">
+  <img id="lb-img" alt="">
+  <button type="button" id="lb-close">Close</button>
+</dialog>
+
+<script>
+(function () {
+  var lb = document.getElementById('lb');
+  var img = document.getElementById('lb-img');
+  if (!lb || typeof lb.showModal !== 'function') return;
+  document.querySelectorAll('.shot').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var inner = btn.querySelector('img');
+      img.src = btn.getAttribute('data-full');
+      img.alt = inner ? inner.alt : '';
+      lb.showModal();
+    });
+  });
+  document.getElementById('lb-close').addEventListener('click', function () { lb.close(); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+})();
+</script>

@@ -1,0 +1,463 @@
+<title>Venue Capability Map</title>
+<meta name="explainer:source" content="docs/competitors/features.md sha256:12fecb2f2e46">
+<meta name="explainer:source" content="docs/competitors/README.md sha256:c1235ab93688">
+<meta name="explainer:artifact" content="https://claude.ai/artifact/QUito4j8RMwMPBBzruDyAC">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; the summary bar and openings come first, the full matrix last as a filterable reference. Same tokens as the Strikee explainer so the docs layer reads as one set. */
+:root {
+  --bg: #f4f6f3;
+  --surface: #ffffff;
+  --sunk: #e9eee9;
+  --fg: #16201a;
+  --muted: #56635b;
+  --line: #d7dfd9;
+  --baize: #1d6a44;
+  --baize-soft: #e2f0e7;
+  --chalk: #2a64a3;
+  --chalk-soft: #e4eef9;
+  --s-yes: #2f8a57;
+  --s-partial: #c08a2a;
+  --s-roadmap: #7a6bb5;
+  --s-no: #b23a2e;
+  --s-unknown: #8a948e;
+  --s-yes-soft: #e2f0e7;
+  --s-partial-soft: #fbf0db;
+  --s-roadmap-soft: #ece9f7;
+  --s-no-soft: #f8e3e0;
+  --s-unknown-soft: #eceeec;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1411; --surface: #151e19; --sunk: #1b2620; --fg: #e5ebe7; --muted: #9aa69f; --line: #2a3630;
+    --baize: #5cc48d; --baize-soft: #183526; --chalk: #85b6ea; --chalk-soft: #172a40;
+    --s-yes: #5cc48d; --s-partial: #e2b05a; --s-roadmap: #a99bea; --s-no: #ec7e72; --s-unknown: #8f9a94;
+    --s-yes-soft: #183526; --s-partial-soft: #362a14; --s-roadmap-soft: #26213f; --s-no-soft: #3a1d1a; --s-unknown-soft: #222b26;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1411; --surface: #151e19; --sunk: #1b2620; --fg: #e5ebe7; --muted: #9aa69f; --line: #2a3630;
+  --baize: #5cc48d; --baize-soft: #183526; --chalk: #85b6ea; --chalk-soft: #172a40;
+  --s-yes: #5cc48d; --s-partial: #e2b05a; --s-roadmap: #a99bea; --s-no: #ec7e72; --s-unknown: #8f9a94;
+  --s-yes-soft: #183526; --s-partial-soft: #362a14; --s-roadmap-soft: #26213f; --s-no-soft: #3a1d1a; --s-unknown-soft: #222b26;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.page { max-width: 760px; margin: 0 auto; display: grid; gap: 52px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+a { color: var(--chalk); }
+.label { font: 500 0.72rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.lede { font-size: 1.08rem; color: var(--muted); max-width: 62ch; }
+
+.hero { padding-top: 56px; display: grid; gap: 18px; }
+.hero .label { color: var(--baize); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 0.93rem; }
+
+/* Status vocabulary */
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 500 0.74rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; padding: 5px 8px; border-radius: 5px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.yes { background: var(--s-yes-soft); color: var(--s-yes); }
+.chip.partial { background: var(--s-partial-soft); color: var(--s-partial); }
+.chip.roadmap { background: var(--s-roadmap-soft); color: var(--s-roadmap); }
+.chip.no { background: var(--s-no-soft); color: var(--s-no); }
+.chip.unknown { background: var(--s-unknown-soft); color: var(--s-unknown); }
+.ev { font: 0.72rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+.ev.site { color: var(--s-partial); }
+
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 18px; }
+.legend div { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 0.92rem; }
+
+/* Coverage bar */
+.coverage { display: grid; gap: 10px; }
+.covrow { display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; align-items: center; }
+.covname { font-weight: 600; }
+.bar { display: flex; height: 26px; border-radius: 6px; overflow: hidden; background: var(--sunk); }
+.bar span { display: block; height: 100%; }
+.bar .yes { background: var(--s-yes); }
+.bar .partial { background: var(--s-partial); }
+.bar .roadmap { background: var(--s-roadmap); }
+.bar .no { background: var(--s-no); }
+.bar .unknown { background: var(--s-unknown); }
+.covtotal { font: 0.85rem var(--font-mono); color: var(--muted); }
+.covkey { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Group strip */
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.group { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.group .dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.group .dots i { width: 12px; height: 12px; border-radius: 3px; display: block; }
+.group .dots i.yes { background: var(--s-yes); }
+.group .dots i.partial { background: var(--s-partial); }
+.group .dots i.roadmap { background: var(--s-roadmap); }
+.group .dots i.no { background: var(--s-no); }
+.group .dots i.unknown { background: var(--s-unknown); }
+.group p { font-size: 0.82rem; color: var(--muted); }
+
+/* Openings */
+.openings { display: grid; gap: 12px; }
+.opening { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; }
+.opening .top { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; }
+.opening h3 { font-size: 1.05rem; }
+.opening .what { font-size: 0.93rem; color: var(--muted); }
+.tawn { background: var(--chalk-soft); border-left: 3px solid var(--chalk); border-radius: 0 8px 8px 0; padding: 10px 14px; display: grid; gap: 2px; font-size: 0.93rem; }
+.tawn .label { color: var(--chalk); }
+
+/* Matrix */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters button { font: 500 0.85rem var(--font-body); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.filters button:focus-visible { outline: 2px solid var(--chalk); outline-offset: 2px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font: 500 0.72rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--sunk); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.grp td { background: var(--sunk); font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; padding-block: 8px; }
+td.cell { display: grid; gap: 4px; justify-items: start; }
+td.cell small { color: var(--muted); font-size: 0.82rem; line-height: 1.4; }
+.empty { padding: 16px; color: var(--muted); }
+
+footer.src { border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+footer.src code { font-family: var(--font-mono); font-size: 0.82rem; }
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <p class="label">Competitors · Read in about 5 minutes</p>
+  <h1>What venue software does, and what it doesn't</h1>
+  <p class="lede">This is the capability map for venue management software: every feature our competitor research has turned up, grouped by the job it does, with who has it and where the gaps are. Use it to see what Tawn must match and where it can stand out.</p>
+  <p class="note"><b>One competitor so far.</b> Every column here is Strikee, so read "the market" as "Strikee" until more profiles are added. The page grows a column per competitor when it is regenerated. For Strikee in depth, read <a href="https://claude.ai/artifact/KQbzuCEGsu49yhCThrXHUp">Strikee, explained</a>.</p>
+</header>
+
+<section aria-labelledby="h-read">
+  <header><h2 id="h-read">How to read a cell</h2></header>
+  <div class="legend">
+    <div><span class="chip yes">Yes</span><span>The feature exists.</span></div>
+    <div><span class="chip partial">Partial</span><span>A limited or manual version exists.</span></div>
+    <div><span class="chip roadmap">Roadmap</span><span>They say it's planned.</span></div>
+    <div><span class="chip no">No</span><span>Not there.</span></div>
+    <div><span class="ev">seen in app</span><span>Someone checked it in the product or its demo.</span></div>
+    <div><span class="ev site">site only</span><span>Only their website says so. Treat it as a claim.</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-cov">
+  <header>
+    <h2 id="h-cov">The short version</h2>
+  </header>
+  <div class="coverage" id="coverage" aria-live="polite"></div>
+  <ul>
+    <li><b>Most of the counter is covered.</b> Sessions, pricing, split bills, credit and the cashbook all work in Strikee's app.</li>
+    <li><b>The gaps sit where money leaves the venue's control:</b> closing the till, refunds, taking payment online, and working without a connection.</li>
+    <li><b>Most of the evidence is first-hand.</b> <span id="evcount">Most</span> cells were checked in the product, not read off a website.</li>
+  </ul>
+  <div class="groups" id="groups"></div>
+</section>
+
+<section aria-labelledby="h-open">
+  <header>
+    <h2 id="h-open">Where the openings are</h2>
+    <p class="lede">Every capability that isn't a plain "yes", with a note on what Tawn could do. The notes are opinions; everything else comes from the matrix.</p>
+  </header>
+  <div class="openings" id="openings"></div>
+</section>
+
+<section aria-labelledby="h-stakes">
+  <header>
+    <h2 id="h-stakes">Table stakes</h2>
+    <p class="lede">What a venue will expect on day one, because the competitor already does it. Tawn needs these, or a clear reason to leave them out.</p>
+  </header>
+  <div class="tawn">
+    <span class="label">For Tawn</span>
+    <p>Two of these sit only in Strikee's top tier: prepaid memberships and the public venue page. Putting them in Tawn's base plan is a cheap way to look generous on price.</p>
+  </div>
+  <ul id="stakes"></ul>
+</section>
+
+<section aria-labelledby="h-matrix">
+  <header>
+    <h2 id="h-matrix">The full matrix</h2>
+    <p class="lede">Every row from the source, for checking a detail.</p>
+  </header>
+  <div class="filters" role="group" aria-label="Filter rows">
+    <button type="button" id="f-all" data-f="all" aria-pressed="true">All</button>
+    <button type="button" id="f-gaps" data-f="gaps" aria-pressed="false">Gaps only</button>
+    <button type="button" id="f-yes" data-f="yes" aria-pressed="false">Has it</button>
+    <button type="button" id="f-site" data-f="site" aria-pressed="false">Site claims only</button>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr id="mhead"><th>Capability</th></tr></thead>
+      <tbody id="mbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="h-grow">
+  <header><h2 id="h-grow">Adding the next competitor</h2></header>
+  <p>Each competitor gets a folder with a profile, and becomes one more column in the matrix. When a profile turns up a capability that isn't listed, it becomes a new row. After that, regenerate this page and the bar above gets one more line.</p>
+</section>
+
+<footer class="src">
+  <p><b>Generated for reading, not for editing.</b> The source of truth is <code>docs/competitors/features.md</code>, with <code>docs/competitors/README.md</code> for the conventions. Change those, then regenerate this page.</p>
+  <p>Built 17 Nov 2026. Matrix as of Strikee's review on 17 Nov 2026. The "For Tawn" notes are the only content not in the source.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var COMPETITORS = [{ name: "Strikee", url: "https://claude.ai/artifact/KQbzuCEGsu49yhCThrXHUp" }];
+  // [capability, group, [status, evidence ("app"|"site"), detail] per competitor, Tawn note for gaps]
+  var ROWS = [
+    ["Timed sessions per table, court or console", "Floor", [["yes", "app", ""]]],
+    ["Billing model per sport (frame, hour, slot)", "Floor", [["yes", "app", ""]]],
+    ["Saved price packages per facility, overridable per session", "Floor", [["yes", "app", ""]]],
+    ["Peak and off-peak rates, price by player count", "Floor", [["yes", "app", "Seen on public pages"]]],
+    ["Group bill modes (split equally, losers pay)", "Floor", [["yes", "app", ""]]],
+    ["Split one bill across several payment modes", "Floor", [["yes", "app", ""]]],
+    ["Counter items on the same bill", "Floor", [["yes", "app", ""]]],
+    ["Slot grid for advance bookings", "Floor", [["yes", "app", ""]]],
+    ["Player booking requests from a public page", "Floor", [["partial", "app", "Request, then manual QR payment"]], "Let players book and pay in one step. The manual WhatsApp step is where requests get lost."],
+    ["Instant online booking with payment", "Floor", [["no", "app", ""]], "The biggest visible gap. It needs payment collection, which Strikee has chosen not to do."],
+    ["Customer profile and visit history", "Customers", [["yes", "app", ""]]],
+    ["Credit (khata) with per-customer limits", "Customers", [["yes", "app", ""]]],
+    ["Store credit (wallet), including refunds to credit", "Customers", [["yes", "app", ""]]],
+    ["Payment reminders", "Customers", [["partial", "app", "WhatsApp template sent by hand"]], "Send reminders automatically on a schedule, with staff able to pause one per customer."],
+    ["Retention signals", "Customers", [["yes", "site", ""]]],
+    ["Prepaid memberships (hour or frame packs)", "Customers", [["yes", "app", "Top tier only"]]],
+    ["Coupons and free-play cards", "Customers", [["yes", "app", ""]]],
+    ["Daily cashbook", "Money", [["yes", "app", ""]]],
+    ["Till count and day close", "Money", [["no", "app", "Promised on the site, absent on every day checked"]], "Count the cash, compare it with what was booked, record the difference, lock the day. Owners are already told to expect this."],
+    ["Refund a settled payment", "Money", [["no", "app", "No action found; refunds to store credit exist in sample data"]], "Refunds as reversing entries, to cash, UPI or store credit, protected by the owner's passcode."],
+    ["Ledger rows locked to their source (session payments edited only from the session)", "Money", [["yes", "app", ""]]],
+    ["Expense tracking with categories", "Money", [["yes", "app", ""]]],
+    ["Recurring expenses", "Money", [["roadmap", "app", ""]], "Low priority to compete on. Strikee will likely ship it soon."],
+    ["Audit trail of who did what", "Money", [["yes", "app", ""]]],
+    ["Exports for the accountant (PDF, CSV)", "Money", [["yes", "app", ""]]],
+    ["GST on invoices", "Money", [["yes", "app", "GSTIN printed"]]],
+    ["GST summary export", "Money", [["roadmap", "site", ""]], "Useful for the accountant, but it's on their roadmap too. Match it rather than lead with it."],
+    ["Processes payments itself", "Money", [["no", "site", ""]], "A strategic choice for Strikee. Taking UPI payments directly would unlock online booking and tournament entry fees for Tawn."],
+    ["Add-on stock, cost and margin", "Inventory", [["yes", "app", ""]]],
+    ["Stocktake against system count", "Inventory", [["yes", "app", ""]]],
+    ["Owner dashboard (P&L, peak hours)", "Owner and staff", [["yes", "app", ""]]],
+    ["Several venues under one login", "Owner and staff", [["yes", "app", ""]]],
+    ["Role permissions", "Owner and staff", [["partial", "app", "Three roles, no floor-only staff role"]], "Add a floor-staff role that can run sessions and take payment but can't change prices or credit limits."],
+    ["Passcode lock on risky actions", "Owner and staff", [["yes", "app", ""]]],
+    ["Public venue page", "Growth", [["yes", "app", "Top tier only"]]],
+    ["Tournaments with public pages", "Growth", [["partial", "app", "Top tier, three games"]], "Support more games, and take entry fees online."],
+    ["Works in a phone browser", "Platform", [["yes", "app", ""]]],
+    ["Installable web app with push notifications", "Platform", [["yes", "app", ""]]],
+    ["Native iOS or Android app", "Platform", [["no", "site", ""]], "Tawn already has an Expo app in the repo. A native counter app is a real difference."],
+    ["Works offline", "Platform", [["no", "app", "An open page keeps working and retries writes on reconnect, but nothing loads offline"]], "Let the counter start and settle sessions with no connection, and sync later. Small-town connections drop."],
+    ["Currencies other than INR", "Platform", [["yes", "app", "Six"]]]
+  ];
+  var ORDER = ["yes", "partial", "roadmap", "no", "unknown"];
+  var NAMES = { yes: "Yes", partial: "Partial", roadmap: "Roadmap", no: "No", unknown: "Unknown" };
+  var GROUP_NOTES = {
+    "Floor": "Running tables and bookings",
+    "Customers": "Accounts, credit, loyalty",
+    "Money": "Cash, ledgers, tax",
+    "Inventory": "Snacks and stock",
+    "Owner and staff": "Control and oversight",
+    "Growth": "Getting new players",
+    "Platform": "Where it runs"
+  };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function chip(status) { return el("span", "chip " + status, NAMES[status]); }
+  function ev(kind) { return el("span", kind === "site" ? "ev site" : "ev", kind === "site" ? "site only" : "seen in app"); }
+
+  // Coverage bars, one per competitor
+  var cov = document.getElementById("coverage");
+  COMPETITORS.forEach(function (c, ci) {
+    var counts = { yes: 0, partial: 0, roadmap: 0, no: 0, unknown: 0 };
+    ROWS.forEach(function (r) { counts[r[2][ci][0]]++; });
+    var row = el("div", "covrow");
+    row.appendChild(el("span", "covname", c.name));
+    var bar = el("div", "bar");
+    bar.setAttribute("role", "img");
+    var desc = [];
+    ORDER.forEach(function (s) {
+      if (!counts[s]) return;
+      var seg = el("span", s);
+      seg.style.width = (counts[s] / ROWS.length * 100) + "%";
+      seg.title = NAMES[s] + ": " + counts[s];
+      bar.appendChild(seg);
+      desc.push(counts[s] + " " + NAMES[s].toLowerCase());
+    });
+    bar.setAttribute("aria-label", c.name + ": " + desc.join(", ") + " of " + ROWS.length);
+    row.appendChild(bar);
+    row.appendChild(el("span", "covtotal", ROWS.length + " capabilities"));
+    cov.appendChild(row);
+    var key = el("div", "covkey");
+    ORDER.forEach(function (s) {
+      if (!counts[s]) return;
+      var k = chip(s);
+      k.textContent = NAMES[s] + " " + counts[s];
+      key.appendChild(k);
+    });
+    cov.appendChild(key);
+  });
+
+  var appCount = ROWS.filter(function (r) { return r[2][0][1] === "app"; }).length;
+  document.getElementById("evcount").textContent = appCount + " of " + ROWS.length;
+
+  // Group strip
+  var groupsEl = document.getElementById("groups");
+  var groupNames = [];
+  ROWS.forEach(function (r) { if (groupNames.indexOf(r[1]) < 0) groupNames.push(r[1]); });
+  groupNames.forEach(function (g) {
+    var rows = ROWS.filter(function (r) { return r[1] === g; });
+    var card = el("div", "group");
+    card.appendChild(el("h3", null, g));
+    var dots = el("div", "dots");
+    var gaps = 0;
+    rows.forEach(function (r) {
+      var s = r[2][0][0];
+      if (s !== "yes") gaps++;
+      var d = el("i", s);
+      d.title = r[0] + ": " + NAMES[s];
+      dots.appendChild(d);
+    });
+    dots.setAttribute("role", "img");
+    dots.setAttribute("aria-label", rows.length + " capabilities, " + gaps + " not fully covered");
+    card.appendChild(dots);
+    card.appendChild(el("p", null, GROUP_NOTES[g] + " · " + (gaps ? gaps + " of " + rows.length + " open" : "all " + rows.length + " covered")));
+    groupsEl.appendChild(card);
+  });
+
+  // Openings, worst first
+  var rank = { no: 0, partial: 1, roadmap: 2, unknown: 3 };
+  var openRows = ROWS.filter(function (r) { return r[2][0][0] !== "yes"; })
+    .sort(function (a, b) { return rank[a[2][0][0]] - rank[b[2][0][0]]; });
+  var openEl = document.getElementById("openings");
+  openRows.forEach(function (r) {
+    var c = r[2][0];
+    var card = el("div", "opening");
+    var top = el("div", "top");
+    top.appendChild(el("h3", null, r[0]));
+    var tags = el("span");
+    tags.style.display = "inline-flex"; tags.style.gap = "8px"; tags.style.alignItems = "center";
+    tags.appendChild(chip(c[0]));
+    tags.appendChild(ev(c[1]));
+    top.appendChild(tags);
+    card.appendChild(top);
+    card.appendChild(el("p", "what", r[1] + (c[2] ? " · " + c[2] : "")));
+    if (r[3]) {
+      var t = el("div", "tawn");
+      t.appendChild(el("span", "label", "For Tawn"));
+      t.appendChild(el("p", null, r[3]));
+      card.appendChild(t);
+    }
+    openEl.appendChild(card);
+  });
+
+  // Table stakes, grouped inline
+  var stakes = document.getElementById("stakes");
+  groupNames.forEach(function (g) {
+    var yes = ROWS.filter(function (r) { return r[1] === g && r[2][0][0] === "yes"; });
+    if (!yes.length) return;
+    var li = el("li");
+    li.appendChild(el("b", null, g + ": "));
+    li.appendChild(document.createTextNode(yes.map(function (r) {
+      return r[0].replace(/\s*\(.*\)$/, "").toLowerCase();
+    }).join("; ") + "."));
+    stakes.appendChild(li);
+  });
+
+  // Matrix
+  var head = document.getElementById("mhead");
+  COMPETITORS.forEach(function (c) {
+    var th = el("th");
+    var a = el("a", null, c.name);
+    a.href = c.url;
+    th.appendChild(a);
+    head.appendChild(th);
+  });
+  var body = document.getElementById("mbody");
+  function match(r, f) {
+    var c = r[2][0];
+    if (f === "gaps") return c[0] !== "yes";
+    if (f === "yes") return c[0] === "yes";
+    if (f === "site") return c[1] === "site";
+    return true;
+  }
+  function render(f) {
+    body.textContent = "";
+    var shown = 0;
+    groupNames.forEach(function (g) {
+      var rows = ROWS.filter(function (r) { return r[1] === g && match(r, f); });
+      if (!rows.length) return;
+      var gr = el("tr", "grp");
+      var gtd = el("td", null, g);
+      gtd.colSpan = COMPETITORS.length + 1;
+      gr.appendChild(gtd);
+      body.appendChild(gr);
+      rows.forEach(function (r) {
+        shown++;
+        var tr = el("tr");
+        tr.appendChild(el("td", null, r[0]));
+        r[2].forEach(function (c) {
+          var td = el("td", "cell");
+          var line = el("span");
+          line.style.display = "inline-flex"; line.style.gap = "8px"; line.style.alignItems = "center"; line.style.flexWrap = "wrap";
+          line.appendChild(chip(c[0]));
+          line.appendChild(ev(c[1]));
+          td.appendChild(line);
+          if (c[2]) td.appendChild(el("small", null, c[2]));
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    });
+    if (!shown) {
+      var tr = el("tr"); var td = el("td", "empty", "No rows match this filter.");
+      td.colSpan = COMPETITORS.length + 1; tr.appendChild(td); body.appendChild(tr);
+    }
+  }
+  var buttons = document.querySelectorAll(".filters button");
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      buttons.forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      render(b.getAttribute("data-f"));
+      try { localStorage.setItem("capmap-filter", b.getAttribute("data-f")); } catch (e) {}
+    });
+  });
+  var saved = "all";
+  try { saved = localStorage.getItem("capmap-filter") || "all"; } catch (e) {}
+  var start = document.querySelector('.filters button[data-f="' + saved + '"]') || buttons[0];
+  buttons.forEach(function (x) { x.setAttribute("aria-pressed", x === start ? "true" : "false"); });
+  render(start.getAttribute("data-f"));
+})();
+</script>

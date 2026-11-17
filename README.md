@@ -12,6 +12,9 @@ This layout is inspired by a larger services monorepo, and it deliberately leave
 ├── mobile/app/              # Expo (iOS and Android)
 ├── web/                     # Next.js admin + @tawn/ui
 ├── docs/infrastructure.md   # what to add when this outgrows one machine
+├── docs/competitors/        # one directory per competitor, plus a capability matrix
+├── docs/README.md           # how docs work: agent-written markdown, plus explainer pages for people
+├── scripts/                 # repo tooling (make docs-check)
 └── .github/workflows/ci.yml
 ```
 

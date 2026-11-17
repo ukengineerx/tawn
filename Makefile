@@ -1,4 +1,4 @@
-.PHONY: dev-up dev-down run-api test check web-dev mobile-start
+.PHONY: dev-up dev-down run-api test check web-dev mobile-start docs-check
 
 COMPOSE = docker compose -f deployments/local/docker-compose.yml
 
@@ -24,3 +24,7 @@ web-dev:
 
 mobile-start:
 	cd mobile/app && npm start
+
+# Which docs explainers are out of date with their source markdown.
+docs-check:
+	python3 scripts/check-explainers.py
