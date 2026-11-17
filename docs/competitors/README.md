@@ -5,6 +5,7 @@ One directory per competitor. Each holds a `README.md` profile and a `screenshot
 | Competitor | What it is | Price | Last reviewed |
 |------------|------------|-------|---------------|
 | [Strikee](strikee/README.md) | Sports venue management for Indian snooker halls, courts, turfs and gaming zones | ₹449–599/month | 2026-11-17 |
+| [CourtReserve](courtreserve/README.md) | Not reviewed yet | | |
 
 ## Adding a competitor
 
