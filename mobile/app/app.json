@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Tawn",
+    "slug": "tawn",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "tawn",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "dev.tawn.app"
+    },
+    "android": {
+      "package": "dev.tawn.app"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

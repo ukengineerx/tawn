@@ -1,0 +1,22 @@
+name: tawn-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tawn
+      POSTGRES_PASSWORD: tawn
+      POSTGRES_DB: tawn
+    ports:
+      # 5433 avoids the Postgres already used by other local projects on 5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tawn -d tawn"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

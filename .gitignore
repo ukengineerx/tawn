@@ -1,0 +1,19 @@
+# dependencies and build output
+node_modules/
+.expo/
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# local env and data
+.env
+.env.local
+*.log
+
+# Go
+backend/bin/
+coverage.out
+
+# OS / editor
+.DS_Store

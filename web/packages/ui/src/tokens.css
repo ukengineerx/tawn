@@ -1,0 +1,10 @@
+:root {
+  --background: #f6f5f2;
+  --surface: #ffffff;
+  --fg: #1c1917;
+  --muted: #57534e;
+  --line: #e7e5e4;
+  --accent: #1c1917;
+  --accent-fg: #fafaf9;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+}
