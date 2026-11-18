@@ -1,0 +1,457 @@
+<title>Tawn Back Office</title>
+<meta name="explainer:source" content="docs/internal-tools/README.md sha256:b107628f7b2f">
+<meta name="explainer:artifact" content="https://claude.ai/artifact/FbpburpqRtersT788jkKAk">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column that follows a venue through Tawn's back office (find → talk → close → bill → support → run), then the open decisions. Teal = tools, amber = open decisions, red = where the report was wrong. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --sunk: #e8ecf0;
+  --fg: #17202a;
+  --muted: #586472;
+  --line: #d5dce3;
+  --teal: #0d6c76;
+  --teal-soft: #dcefef;
+  --amber: #9a6208;
+  --amber-soft: #fbefd6;
+  --red: #b0352b;
+  --red-soft: #f8e1de;
+  --green: #1f7445;
+  --green-soft: #ddf0e4;
+  --violet: #5b4bb0;
+  --violet-soft: #e9e6f8;
+  --font-display: "Schibsted Grotesk", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --surface: #161d25; --sunk: #1c2530; --fg: #e4e9ee; --muted: #9aa6b2; --line: #2a3440;
+    --teal: #5cc3cc; --teal-soft: #14313a; --amber: #e5b257; --amber-soft: #382a12;
+    --red: #ee8076; --red-soft: #3c1d1a; --green: #6cca93; --green-soft: #17331f;
+    --violet: #a99cf0; --violet-soft: #26213f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #161d25; --sunk: #1c2530; --fg: #e4e9ee; --muted: #9aa6b2; --line: #2a3440;
+  --teal: #5cc3cc; --teal-soft: #14313a; --amber: #e5b257; --amber-soft: #382a12;
+  --red: #ee8076; --red-soft: #3c1d1a; --green: #6cca93; --green-soft: #17331f;
+  --violet: #a99cf0; --violet-soft: #26213f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 17px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.page { max-width: 780px; margin: 0 auto; display: grid; gap: 60px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.12; }
+h1 { font-size: clamp(2.3rem, 6.5vw, 3.4rem); font-weight: 800; letter-spacing: -0.025em; }
+h2 { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+a { color: var(--teal); }
+code { font: 0.86em var(--font-mono); background: var(--sunk); padding: 1px 5px; border-radius: 4px; }
+.label { font: 500 0.72rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); }
+.muted { color: var(--muted); }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.lede { font-size: 1.1rem; color: var(--muted); max-width: 62ch; }
+
+/* Tags */
+.tag { display: inline-block; font: 500 0.66rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.07em; padding: 4px 6px; border-radius: 4px; vertical-align: 2px; white-space: nowrap; }
+.t-checked { background: var(--green-soft); color: var(--green); }
+.t-report { background: var(--sunk); color: var(--muted); }
+.t-infer { background: var(--violet-soft); color: var(--violet); }
+.t-wrong { background: var(--red-soft); color: var(--red); }
+.t-open { background: var(--amber-soft); color: var(--amber); }
+.t-set { background: var(--teal-soft); color: var(--teal); }
+
+/* Hero */
+.hero { padding-top: 56px; display: grid; gap: 18px; }
+.status { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--amber-soft); color: var(--fg); border-radius: 8px; padding: 10px 14px; font-weight: 600; }
+.status .tag { background: var(--surface); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 0.92rem; color: var(--muted); }
+
+/* Short version */
+.short { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.short > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.short h3 { font-size: 1rem; }
+
+/* Journey diagram */
+.journey { display: grid; gap: 10px; }
+.stage { display: grid; grid-template-columns: 9.5rem 1fr; gap: 14px; align-items: start; padding: 14px 0; border-top: 1px solid var(--line); }
+.stage:last-child { border-bottom: 1px solid var(--line); }
+.stage-name { display: grid; gap: 2px; }
+.stage-name strong { font-family: var(--font-display); font-size: 1.05rem; }
+.stage-name span { font-size: 0.88rem; color: var(--muted); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tool { border-radius: 8px; padding: 7px 10px; font-size: 0.92rem; line-height: 1.3; display: grid; gap: 1px; }
+.tool b { font-weight: 700; }
+.tool small { color: var(--muted); font-size: 0.8rem; }
+.tool.set { background: var(--teal-soft); border: 1.5px solid var(--teal); }
+.tool.prop { background: var(--surface); border: 1.5px dashed var(--line); }
+.tool.gap { background: transparent; border: 1.5px dashed var(--red); color: var(--red); }
+.tool.gap small { color: var(--red); }
+.bridge-note { font-size: 0.92rem; color: var(--muted); }
+@media (max-width: 560px) { .stage { grid-template-columns: 1fr; gap: 8px; } }
+
+/* Wrong list */
+.wrong { display: grid; gap: 12px; }
+.wrong > div { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.wrong > div > * { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.wrong > div > :first-child { background: var(--red-soft); }
+@media (max-width: 560px) { .wrong > div { grid-template-columns: 1fr; } }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 0.72rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: var(--sunk); }
+tr:last-child td { border-bottom: 0; }
+
+/* Timeline */
+.timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; position: relative; }
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--line); }
+.phase { position: relative; display: grid; gap: 8px; padding-right: 12px; align-content: start; }
+.phase .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 2px solid var(--teal); position: relative; }
+.phase:first-child .dot { background: var(--teal); }
+.phase h3 { font-size: 0.98rem; }
+.phase ul { font-size: 0.9rem; padding-left: 1em; gap: 3px; }
+.phase .ours { font-size: 0.86rem; color: var(--teal); font-weight: 600; }
+@media (max-width: 620px) {
+  .timeline { grid-template-columns: 1fr; gap: 18px; }
+  .timeline::before { left: 11px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+  .phase { grid-template-columns: 24px 1fr; column-gap: 14px; padding-right: 0; }
+  .phase > :not(.dot) { grid-column: 2; }
+  .phase .dot { grid-row: 1 / span 3; }
+}
+
+/* Decisions */
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; counter-reset: dec; }
+.decision { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--amber); border-radius: 10px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.decision h3 { font-size: 1rem; display: flex; gap: 8px; align-items: baseline; }
+.decision h3::before { counter-increment: dec; content: counter(dec); font: 500 0.8rem var(--font-mono); color: var(--amber); }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt { font-size: 0.86rem; background: var(--sunk); border-radius: 999px; padding: 3px 10px; }
+.decision p { font-size: 0.9rem; color: var(--muted); }
+.decision.big { grid-column: 1 / -1; border-top-color: var(--red); }
+
+/* Notes */
+.note { border-left: 3px solid var(--violet); background: var(--violet-soft); padding: 12px 14px; border-radius: 0 8px 8px 0; display: grid; gap: 6px; }
+.note .label { color: var(--violet); }
+
+/* Risk grid */
+.risks { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.risks > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.risks p { font-size: 0.93rem; }
+
+.ask { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.ask > div { display: grid; gap: 6px; align-content: start; }
+.ask ul { font-size: 0.95rem; }
+
+footer { border-top: 1px solid var(--line); padding-top: 20px; font-size: 0.88rem; color: var(--muted); display: grid; gap: 8px; }
+</style>
+
+<main class="page">
+
+  <header class="hero">
+    <span class="label">Tawn · internal tools research · 18 Nov 2026</span>
+    <h1>Tawn's back office, before we choose</h1>
+    <p class="lede">The software Tawn the company would use to find venue owners, talk to them, sign them, bill them and support them, plus the tools to run its own engineering. None of this is the venue product.</p>
+    <div class="status"><span class="tag t-open">Not decided</span> This page collects options for discussion. Nothing here is installed or chosen yet.</div>
+    <div class="legend">
+      <span><span class="tag t-checked">Checked</span> we confirmed it</span>
+      <span><span class="tag t-report">Report</span> the research report says so</span>
+      <span><span class="tag t-infer">Inference</span> our reasoning</span>
+    </div>
+  </header>
+
+  <section>
+    <header><h2>The short version</h2></header>
+    <div class="short">
+      <div>
+        <h3>What we have</h3>
+        <ul>
+          <li>A working set: Sellbird, Chatwoot, Billr, and a Go bridge we'd write.</li>
+          <li>A research report proposing about 12 more tools.</li>
+          <li>Spot checks on the claims that matter.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What the checks found</h3>
+        <ul>
+          <li>The proposed UPI billing kit is an alpha library, not a service.</li>
+          <li>Billr has no webhooks, so one planned sync can't work as described.</li>
+          <li>Three licences were stated wrong.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What to decide first</h3>
+        <ul>
+          <li>Who issues invoices: Billr, Zoho Books, or both.</li>
+          <li>How subscriptions get collected in India.</li>
+          <li>How much to run now versus later.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <h2>A venue's path through the back office</h2>
+      <p class="lede">Each step a venue owner goes through, and the tools that could handle it. Solid boxes are the working set. Dashed boxes are proposals from the report. Red marks a gap nobody has filled.</p>
+    </header>
+    <div class="journey">
+      <div class="stage">
+        <div class="stage-name"><strong>Find</strong><span>Who to approach</span></div>
+        <div class="tools">
+          <div class="tool set"><b>Sellbird</b><small>OSM search, website signals, owner lookup</small></div>
+          <div class="tool gap"><b>Better Indian venue source</b><small>OSM is thin for small venues</small></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-name"><strong>Talk</strong><span>First reply onward</span></div>
+        <div class="tools">
+          <div class="tool set"><b>Sellbird</b><small>cold email, approved by you</small></div>
+          <div class="tool set"><b>Chatwoot</b><small>WhatsApp, email, site chat</small></div>
+          <div class="tool prop"><b>Cal.com</b><small>demo calls</small></div>
+          <div class="tool prop"><b>Listmonk</b><small>newsletters</small></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-name"><strong>Track and close</strong><span>Contacted to paid</span></div>
+        <div class="tools">
+          <div class="tool prop"><b>Twenty</b><small>CRM pipeline</small></div>
+          <div class="tool prop"><b>Documenso</b><small>signed agreements</small></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-name"><strong>Bill</strong><span>Invoices and GST</span></div>
+        <div class="tools">
+          <div class="tool set"><b>Billr</b><small>invoices, payments, reports</small></div>
+          <div class="tool prop"><b>Zoho Books</b><small>GST invoices, filing (hosted)</small></div>
+          <div class="tool prop"><b>Razorpay UPI kit</b><small>mandates, retries</small></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-name"><strong>Support</strong><span>Once they're live</span></div>
+        <div class="tools">
+          <div class="tool set"><b>Chatwoot</b><small>inbox</small></div>
+          <div class="tool prop"><b>Chatwoot help center</b><small>built in</small></div>
+          <div class="tool gap"><b>Phone support</b><small>unchecked</small></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stage-name"><strong>Run Tawn</strong><span>Engineering and team</span></div>
+        <div class="tools">
+          <div class="tool set"><b>website-launch-skills</b><small>site launch checks</small></div>
+          <div class="tool set"><b>Map</b><small>architecture</small></div>
+          <div class="tool prop"><b>GlitchTip</b><small>errors</small></div>
+          <div class="tool prop"><b>Uptime Kuma</b><small>uptime, status page</small></div>
+          <div class="tool prop"><b>Coolify</b><small>deploys</small></div>
+          <div class="tool prop"><b>Vaultwarden</b><small>passwords</small></div>
+          <div class="tool prop"><b>Tailscale</b><small>private access</small></div>
+          <div class="tool prop"><b>Plane</b><small>tasks</small></div>
+          <div class="tool prop"><b>Metabase</b><small>dashboards</small></div>
+          <div class="tool gap"><b>SSO, backups, logs</b><small>not covered</small></div>
+        </div>
+      </div>
+    </div>
+    <p class="bridge-note">Our Go bridge connects the steps: Sellbird hands interested owners to Chatwoot, a won deal creates the client in Billr, and invoice links go out over WhatsApp. The report agrees with writing this ourselves instead of running n8n.</p>
+  </section>
+
+  <section>
+    <header>
+      <h2>Where the report was wrong</h2>
+      <p class="lede">The claims we checked against source code, READMEs and the GitHub API on 18 November 2026.</p>
+    </header>
+    <div class="wrong">
+      <div>
+        <div><span class="label">The report said</span>The Razorpay Recurring UPI Kit is an MIT-licensed service that needs under 500 MB of RAM.</div>
+        <div><span class="tag t-checked">Checked</span>It's an Apache-2.0 TypeScript library that runs inside your own app, and Tawn's API is in Go. Its README calls it alpha and "not production-hardened". It has 0 stars, and all its commits are from one day in June.</div>
+      </div>
+      <div>
+        <div><span class="label">The report said</span>The bridge listens for Billr's "invoice paid" webhook and copies the invoice into Zoho Books.</div>
+        <div><span class="tag t-checked">Checked</span>Billr sends no webhooks. Its API routes are auth, health, invoices, mcp, oauth, public, stripe and v1. The bridge would have to poll Billr instead.</div>
+      </div>
+      <div>
+        <div><span class="label">The report said</span>Vaultwarden is GPL-3.0, and Cal.com is AGPL-3.0.</div>
+        <div><span class="tag t-checked">Checked</span>Vaultwarden is AGPL-3.0. The <code>calcom/cal.com</code> repo now redirects to <code>calcom/cal.diy</code>, which GitHub lists as MIT. We don't yet know what that change means.</div>
+      </div>
+      <div>
+        <div><span class="label">The report said</span>Self-hosting the CRM avoids liability under the DPDP Act.</div>
+        <div><span class="tag t-infer">Inference</span>Tawn is the data fiduciary and is responsible wherever the data sits. Hosted processors are allowed under a contract. Owners' names and numbers are personal data either way.</div>
+      </div>
+      <div>
+        <div><span class="label">The report said</span>Run Coolify, with one shared Postgres and one shared Redis for every app.</div>
+        <div><span class="tag t-infer">Inference</span>Coolify likes to run each app's database itself, so the two ideas pull against each other. Pick one: Coolify manages everything, or a plain compose file manages a shared database.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <h2>Three tools doing the same job</h2>
+      <p class="lede">The report adds tools that overlap with the working set. Each overlap means two places holding the same record, and one of them must win.</p>
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Job</th><th>Working set</th><th>Proposed</th><th>The question</th></tr></thead>
+        <tbody>
+          <tr><td>Track a venue from contacted to paid</td><td>Sellbird pipeline, Chatwoot labels</td><td>Twenty</td><td>Is a third tracker worth it at low volume?</td></tr>
+          <tr><td>Send invoices</td><td>Billr</td><td>Zoho Books</td><td>Zoho Books also sends invoices, so Billr may be redundant.</td></tr>
+          <tr><td>Recurring billing</td><td>Billr's recurring flag</td><td>UPI kit, Zoho Books, Razorpay Subscriptions</td><td>Which one owns the subscription?</td></tr>
+          <tr><td>Help articles</td><td>Chatwoot</td><td>Chatwoot help center</td><td>No conflict. It's the same tool.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <h2>When each tool is needed</h2>
+      <p class="lede">The report's timing, with a smaller starting set marked against it.</p>
+    </header>
+    <div class="timeline">
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>Now</h3>
+        <ul><li>Zoho Books</li><li>GlitchTip, Uptime Kuma</li><li>Go bridge</li><li>Coolify, Vaultwarden</li><li>Plane</li></ul>
+        <p class="ours">Smaller start: Chatwoot, Billr, Sellbird, GlitchTip, Uptime Kuma, Vaultwarden</p>
+      </div>
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>First paying venue</h3>
+        <ul><li>Twenty</li><li>UPI subscriptions</li><li>Documenso</li></ul>
+      </div>
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>10+ venues</h3>
+        <ul><li>Chatwoot help center</li></ul>
+      </div>
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>20+ venues</h3>
+        <ul><li>Listmonk, Cal.com</li><li>Metabase</li></ul>
+      </div>
+    </div>
+    <div class="note">
+      <span class="label">For Tawn</span>
+      <p>The report sizes the whole stack at about 12 services and 12–14 GB of RAM, on two 8 GB servers <span class="tag t-report">Report</span>. Starting with only what's needed now is much smaller, and the rest can be added as venues arrive.</p>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <h2>Decisions to make</h2>
+      <p class="lede">Each one is open. Record the choice in the decision log in the source doc once it's made.</p>
+    </header>
+    <div class="decisions">
+      <div class="decision big">
+        <h3>Invoicing and accounting</h3>
+        <div class="opts"><span class="opt">Zoho Books only</span><span class="opt">Billr + Zoho Books, synced</span><span class="opt">Billr extended with GST</span></div>
+        <p>This matters most, because it shapes the bridge, the billing work and who owns the GST invoice. Zoho Books is reported at ₹749 a month with GST filing included <span class="tag t-report">Report</span>.</p>
+      </div>
+      <div class="decision">
+        <h3>Collecting subscriptions</h3>
+        <div class="opts"><span class="opt">Razorpay Subscriptions</span><span class="opt">Zoho recurring</span><span class="opt">Manual UPI + UTR match</span></div>
+        <p>Depends on whether owners accept UPI Autopay mandates.</p>
+      </div>
+      <div class="decision">
+        <h3>Sales pipeline</h3>
+        <div class="opts"><span class="opt">Chatwoot labels</span><span class="opt">Twenty</span></div>
+        <p>Twenty adds Redis and may put SSO behind a paid plan <span class="tag t-infer">Inference</span>.</p>
+      </div>
+      <div class="decision">
+        <h3>Deployment model</h3>
+        <div class="opts"><span class="opt">Coolify</span><span class="opt">Compose + Caddy</span></div>
+        <p>Decides whether the databases are shared or run per app.</p>
+      </div>
+      <div class="decision">
+        <h3>Start now or later</h3>
+        <div class="opts"><span class="opt">Report's "now" list</span><span class="opt">Smaller start</span></div>
+        <p>Sets the server size and how much there is to maintain.</p>
+      </div>
+      <div class="decision">
+        <h3>Hosting</h3>
+        <div class="opts"><span class="opt">Hetzner (Singapore)</span><span class="opt">AWS Mumbai</span><span class="opt">Indian provider</span></div>
+        <p>Hetzner has no India region <span class="tag t-infer">Inference</span>.</p>
+      </div>
+      <div class="decision">
+        <h3>Contracts</h3>
+        <div class="opts"><span class="opt">Online terms at sign-up</span><span class="opt">Documenso</span></div>
+        <p>Click-to-sign likely works for a small subscription; confirm with a lawyer.</p>
+      </div>
+      <div class="decision">
+        <h3>Tasks</h3>
+        <div class="opts"><span class="opt">GitHub Projects</span><span class="opt">Plane</span></div>
+        <p>Plane needs about 3 GB of RAM <span class="tag t-report">Report</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <header><h2>Risks to keep in view</h2></header>
+    <div class="risks">
+      <div>
+        <h3>GST on Billr invoices</h3>
+        <p>Billr has no Indian GST format, so its PDFs alone aren't compliant invoices for Indian venues. Something else has to issue the official invoice.</p>
+      </div>
+      <div>
+        <h3>Never collect Aadhaar</h3>
+        <p>The report suggests encrypting Aadhaar or PAN. The Aadhaar Act restricts who may store Aadhaar, so don't collect it at all <span class="tag t-infer">Inference</span>.</p>
+      </div>
+      <div>
+        <h3>AGPL</h3>
+        <p>AGPL tools are fine internally. If people outside Tawn use a modified copy over the network, we must publish our changes. This covers Sellbird, Listmonk, Documenso, Plane and Vaultwarden.</p>
+      </div>
+      <div>
+        <h3>Shared Redis</h3>
+        <p>One Postgres server with a database per app is fine. Sharing one Redis is riskier: Sidekiq needs <code>noeviction</code>, and one app clearing its data can affect the others.</p>
+      </div>
+      <div>
+        <h3>Product analytics gap</h3>
+        <p>Plausible and Umami count website visits. Funnels and feature use in the venue app need something else, perhaps PostHog's hosted tier, since self-hosting it needs about 16 GB <span class="tag t-report">Report</span>.</p>
+      </div>
+      <div>
+        <h3>Not covered at all</h3>
+        <p>Single sign-on across the tools, backups with a tested restore, one place for logs, and feature flags.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <header><h2>Questions for people outside the team</h2></header>
+    <div class="ask">
+      <div>
+        <h3>A CA</h3>
+        <ul><li>When must Tawn register for GST?</li><li>What must an invoice to a venue contain?</li></ul>
+      </div>
+      <div>
+        <h3>A lawyer</h3>
+        <ul><li>Is click-to-sign enough?</li><li>What consent does outreach need under the DPDP Act?</li><li>What should we never collect?</li></ul>
+      </div>
+      <div>
+        <h3>The first venue owners</h3>
+        <ul><li>Email, or only WhatsApp?</li><li>Will they accept UPI Autopay?</li><li>A demo call, or a visit?</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Generated from <code>docs/internal-tools/README.md</code> on 18 November 2026. Don't edit this page by hand: change the markdown and regenerate it.</p>
+    <p>Claims marked Report come from a research report by another agent, received 18 November 2026. Checked claims were confirmed against the GitHub and GitLab APIs, the Questili kit's README, and the cloned Billr, Sellbird, Map and website-launch-skills repositories on the same day. Nothing on this page goes beyond the source doc.</p>
+  </footer>
+
+</main>

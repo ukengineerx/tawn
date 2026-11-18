@@ -13,6 +13,7 @@ This layout is inspired by a larger services monorepo, and it deliberately leave
 ├── web/                     # Next.js admin + @tawn/ui
 ├── docs/infrastructure.md   # what to add when this outgrows one machine
 ├── docs/competitors/        # one directory per competitor, plus a capability matrix
+├── docs/internal-tools/     # research on the tools Tawn uses to sell, support and bill (not decided)
 ├── docs/README.md           # how docs work: agent-written markdown, plus explainer pages for people
 ├── scripts/                 # repo tooling (make docs-check)
 └── .github/workflows/ci.yml

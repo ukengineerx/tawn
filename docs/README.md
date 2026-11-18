@@ -35,3 +35,4 @@ make docs-check
 |--------|-----------|-----------|
 | [competitors](competitors/) | [explainer.html](competitors/explainer.html) (the features matrix) | [Venue Capability Map](https://claude.ai/artifact/QUito4j8RMwMPBBzruDyAC) |
 | [competitors/strikee](competitors/strikee/) | [explainer.html](competitors/strikee/explainer.html) | [Strikee, explained](https://claude.ai/artifact/KQbzuCEGsu49yhCThrXHUp) |
+| [internal-tools](internal-tools/) | [explainer.html](internal-tools/explainer.html) | [Tawn Back Office](https://claude.ai/artifact/FbpburpqRtersT788jkKAk) |
